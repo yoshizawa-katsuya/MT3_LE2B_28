@@ -55,3 +55,18 @@ typedef struct Sphere {
 	Vector3 center;
 	float radius;
 } Sphere;
+
+typedef struct Line {
+	Vector3 origin;
+	Vector3 diff;
+} Line;
+
+typedef struct Ray {
+	Vector3 origin;
+	Vector3 diff;
+} Ray;
+
+typedef struct Segment {
+	Vector3 origin;
+	Vector3 diff;
+} Segment;

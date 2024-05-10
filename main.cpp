@@ -1,5 +1,6 @@
 #include <Novice.h>
 #include "Matrix.h"
+#include "Vector.h"
 #include <ImGuiManager.h>
 #include <imgui.h>
 
@@ -28,6 +29,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 ViewProjectionMatrix;
 	Matrix4x4 viewportMatrix;
 
+	Segment segment{ {-2.0f, -1.0f, 0.0f}, {3.0f, 2.0f, 2.0f} };
+	Vector3 point{ -1.5f, 0.6f, 0.6f };
+
+	Vector3 start;
+	Vector3 end;
+
+	Vector3 project = Project(Subtract(point, segment.origin), segment.diff);
+	Vector3 closestPoint = ClosestPoint(point, segment);
+	
+	Sphere pointSphere{ point, 0.01f };	//1cmの弾を描画
+	Sphere closestPointSphere{ closestPoint, 0.01f };
 
 	
 	// ウィンドウの×ボタンが押されるまでループ
@@ -49,9 +61,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ViewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 		viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
+		start = Transform(Transform(segment.origin, ViewProjectionMatrix), viewportMatrix);
+		end = Transform(Transform(Add(segment.origin, segment.diff), ViewProjectionMatrix), viewportMatrix);
+
+		closestPoint = ClosestPoint(point, segment);
+		pointSphere = { point, 0.01f };
+		closestPointSphere = { closestPoint, 0.01f };
+
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
+		ImGui::DragFloat3("Point", &point.x, 0.01f);
+		ImGui::DragFloat3("Segemnt origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("Segment diff", &segment.diff.x, 0.01f);
+		ImGui::InputFloat3("Project", &project.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
 		ImGui::End();
 
 
@@ -65,6 +88,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
 
+		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), WHITE);
+
+
+		DrawSphere(pointSphere, ViewProjectionMatrix, viewportMatrix, RED);
+		DrawSphere(closestPointSphere, ViewProjectionMatrix, viewportMatrix, BLACK);
+
+		
 		///
 		/// ↑描画処理ここまで
 		///
