@@ -70,6 +70,11 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 //ビューポート変換行列
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
 
+//グリッドの描画
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
 
+//球の描画
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+
+//球と球の衝突判定
+bool IsCollision(const Sphere& s1, const Sphere& s2);
