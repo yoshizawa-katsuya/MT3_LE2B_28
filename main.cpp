@@ -29,7 +29,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 ViewProjectionMatrix;
 	Matrix4x4 viewportMatrix;
 
-
+	Segment segment{ {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f, 0.0f} };
+	Plane plane{ {0.0f, 1.0f, 0.0f}, 0.0f };
 	
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -53,6 +54,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
+		ImGui::DragFloat3("segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("segment.diff", &segment.diff.x, 0.01f);
+		ImGui::DragFloat3("plane.normal", &plane.normal.x, 0.01f);
+		plane.normal = Normalize(plane.normal);
+		ImGui::DragFloat("plane.distance", &plane.distance, 0.01f);
 		ImGui::End();
 
 
@@ -65,6 +71,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
+
+		if (IsCollision(segment, plane)) {
+			DrawSegment(segment, ViewProjectionMatrix, viewportMatrix, RED);
+		}
+		else {
+			DrawSegment(segment, ViewProjectionMatrix, viewportMatrix, WHITE);
+		}
+		DrawPlane(plane, ViewProjectionMatrix, viewportMatrix, WHITE);
 
 		///
 		/// ↑描画処理ここまで

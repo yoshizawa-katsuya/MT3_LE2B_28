@@ -76,6 +76,9 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 //球の描画
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
+//線分の描画
+void DrawSegment(const Segment& segment, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+
 //平面の描画
 void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
@@ -84,3 +87,12 @@ bool IsCollision(const Sphere& s1, const Sphere& s2);
 
 //球と平面の衝突判定
 bool IsCollision(const Sphere& sphere, const Plane& plane);
+
+//直線と平面の衝突判定
+bool IsCollision(const Line& line, const Plane& plane);
+
+//線分と平面の衝突判定
+bool IsCollision(const Ray& ray, const Plane& plane);
+
+//線分と平面の衝突判定
+bool IsCollision(const Segment& segment, const Plane& plane);

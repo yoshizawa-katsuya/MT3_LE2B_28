@@ -537,6 +537,14 @@ void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, con
 
 }
 
+void DrawSegment(const Segment& segment, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
+
+	Vector3 start = Transform(Transform(segment.origin, viewProjectionMatrix), viewportMatrix);
+	Vector3 end = Transform(Transform(Add(segment.origin, segment.diff), viewProjectionMatrix), viewportMatrix);
+	Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), color);
+
+}
+
 void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
 
 	Vector3 center = Multiply(plane.distance, plane.normal);
@@ -581,4 +589,45 @@ bool IsCollision(const Sphere& sphere, const Plane& plane) {
 		return false;
 	}
 	return true;
+}
+
+bool IsCollision(const Line& line, const Plane& plane) {
+
+	float dot = Dot(line.diff, plane.normal);
+	if (dot == 0.0f) {
+		return false;
+	}
+	return true;
+
+}
+
+bool IsCollision(const Ray& ray, const Plane& plane) {
+
+	float dot = Dot(ray.diff, plane.normal);
+	if (dot == 0.0f) {
+		return false;
+	}
+
+	float t = (plane.distance - Dot(ray.origin, plane.normal)) / dot;
+	if (0 <= t) {
+		return true;
+	}
+	return false;
+
+
+}
+
+bool IsCollision(const Segment& segment, const Plane& plane) {
+
+	float dot = Dot(segment.diff, plane.normal);
+	if (dot == 0.0f) {
+		return false;
+	}
+
+	float t = (plane.distance - Dot(segment.origin, plane.normal)) / dot;
+	if (0 <= t && t <= 1) {
+		return true;
+	}
+	return false;
+
 }
