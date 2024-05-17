@@ -29,7 +29,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 ViewProjectionMatrix;
 	Matrix4x4 viewportMatrix;
 
-
+	Sphere sphere{ {0.0f, 0.0f, 0.0f}, 1.0f };
+	Plane plane{ {0.0f, 1.0f, 0.0f}, 0.0f };
 	
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -53,6 +54,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
+		ImGui::DragFloat3("Sphere.center", &sphere.center.x, 0.01f);
+		ImGui::DragFloat("Sphere.radius", &sphere.radius, 0.01f);
+		ImGui::DragFloat3("Plane.normal", &plane.normal.x, 0.01f);
+		plane.normal = Normalize(plane.normal);
+		ImGui::DragFloat("Plane.distance", &plane.distance, 0.01f);
 		ImGui::End();
 
 
@@ -65,6 +71,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
+
+		if (!IsCollision(sphere, plane)) {
+			DrawSphere(sphere, ViewProjectionMatrix, viewportMatrix, WHITE);
+		}
+		else {
+			DrawSphere(sphere, ViewProjectionMatrix, viewportMatrix, RED);
+		}
+		DrawPlane(plane, ViewProjectionMatrix, viewportMatrix, WHITE);
 
 		///
 		/// ↑描画処理ここまで

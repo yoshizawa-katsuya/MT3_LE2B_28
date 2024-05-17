@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Struct.h"
 #include <Novice.h>
 
@@ -30,3 +30,6 @@ Vector3 Project(const Vector3& v1, const Vector3& v2);
 
 //最近接点
 Vector3 ClosestPoint(const Vector3& point, const Segment& segment);
+
+//垂直なベクトルを求める
+Vector3 Perpendicular(const Vector3& vector);
