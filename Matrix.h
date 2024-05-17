@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Struct.h"
 #include <assert.h>
 #include <Novice.h>
@@ -76,5 +76,11 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 //球の描画
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
+//平面の描画
+void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+
 //球と球の衝突判定
 bool IsCollision(const Sphere& s1, const Sphere& s2);
+
+//球と平面の衝突判定
+bool IsCollision(const Sphere& sphere, const Plane& plane);
