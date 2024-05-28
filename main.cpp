@@ -29,8 +29,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 ViewProjectionMatrix;
 	Matrix4x4 viewportMatrix;
 
+	Segment segment = { {0.0f, 1.0f, -1.0f}, {0.0f, 0.0f, 2.0f} };
+	Triangle triangle;
+	triangle.vertices[0] = { -2.0f, 0.0f, 0.0f };
+	triangle.vertices[1] = { 2.0f, 0.0f, 0.0f };
+	triangle.vertices[2] = { 0.0f, 2.0f, 0.0f };
 
-	
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -53,6 +58,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
+		ImGui::DragFloat3("triangle.vertices[0]", &triangle.vertices[0].x, 0.01f);
+		ImGui::DragFloat3("triangle.vertices[1]", &triangle.vertices[1].x, 0.01f);
+		ImGui::DragFloat3("triangle.vertices[2]", &triangle.vertices[2].x, 0.01f);
+		ImGui::DragFloat3("segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("segment.diff", &segment.diff.x, 0.01f);
 		ImGui::End();
 
 
@@ -65,6 +75,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
+
+		DrawTriangle(triangle, ViewProjectionMatrix, viewportMatrix, WHITE);
+
+		if (IsCollision(triangle, segment)) {
+			DrawSegment(segment, ViewProjectionMatrix, viewportMatrix, RED);
+		}
+		else {
+			DrawSegment(segment, ViewProjectionMatrix, viewportMatrix, WHITE);
+		}
 
 		///
 		/// ↑描画処理ここまで
