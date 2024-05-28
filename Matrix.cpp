@@ -580,6 +580,18 @@ void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const 
 
 }
 
+void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
+
+	Triangle drawTriangle;
+	drawTriangle.vertices[0] = Transform(Transform(triangle.vertices[0], viewProjectionMatrix), viewportMatrix);
+	drawTriangle.vertices[1] = Transform(Transform(triangle.vertices[1], viewProjectionMatrix), viewportMatrix);
+	drawTriangle.vertices[2] = Transform(Transform(triangle.vertices[2], viewProjectionMatrix), viewportMatrix);
+
+	Novice::DrawTriangle(static_cast<int>(drawTriangle.vertices[0].x), static_cast<int>(drawTriangle.vertices[0].y), static_cast<int>(drawTriangle.vertices[1].x), static_cast<int>(drawTriangle.vertices[1].y), static_cast<int>(drawTriangle.vertices[2].x), static_cast<int>(drawTriangle.vertices[2].y), color, kFillModeWireFrame);
+
+}
+
+
 bool IsCollision(const Sphere& s1, const Sphere& s2) {
 
 	//2つの球の中心点間の距離を求める
@@ -641,6 +653,122 @@ bool IsCollision(const Segment& segment, const Plane& plane) {
 	if (0 <= t && t <= 1) {
 		return true;
 	}
+	return false;
+
+}
+
+bool IsCollision(const Triangle& triangle, const Line& line) {
+
+	Plane plane;
+	Vector3 v01 = Subtract(triangle.vertices[1], triangle.vertices[0]);
+	Vector3 v12 = Subtract(triangle.vertices[2], triangle.vertices[1]);
+	plane.normal = Normalize(Cross(v01, v12));
+	plane.distance = Dot(triangle.vertices[0], plane.normal);
+
+	float dot = Dot(line.diff, plane.normal);
+	if (dot == 0.0f) {
+		return false;
+	}
+
+	float t = (plane.distance - Dot(line.origin, plane.normal)) / dot;
+	
+
+	Vector3 p = Add(line.origin, Multiply(t, line.diff));
+	Vector3 v20 = Subtract(triangle.vertices[0], triangle.vertices[2]);
+	Vector3 v1p = Subtract(p, triangle.vertices[1]);
+	Vector3 v2p = Subtract(p, triangle.vertices[2]);
+	Vector3 v0p = Subtract(p, triangle.vertices[0]);
+
+	Vector3 cross01 = Cross(v01, v1p);
+	Vector3 cross12 = Cross(v12, v2p);
+	Vector3 cross20 = Cross(v20, v0p);
+
+	if (Dot(cross01, plane.normal) >= 0.0f &&
+		Dot(cross12, plane.normal) >= 0.0f &&
+		Dot(cross20, plane.normal) >= 0.0f) {
+		return true;
+	}
+
+	
+
+	return false;
+
+
+}
+
+bool IsCollision(const Triangle& triangle, const Ray& ray) {
+
+	Plane plane;
+	Vector3 v01 = Subtract(triangle.vertices[1], triangle.vertices[0]);
+	Vector3 v12 = Subtract(triangle.vertices[2], triangle.vertices[1]);
+	plane.normal = Normalize(Cross(v01, v12));
+	plane.distance = Dot(triangle.vertices[0], plane.normal);
+
+	float dot = Dot(ray.diff, plane.normal);
+	if (dot == 0.0f) {
+		return false;
+	}
+
+	float t = (plane.distance - Dot(ray.origin, plane.normal)) / dot;
+	if (t >= 0) {
+
+		Vector3 p = Add(ray.origin, Multiply(t, ray.diff));
+		Vector3 v20 = Subtract(triangle.vertices[0], triangle.vertices[2]);
+		Vector3 v1p = Subtract(p, triangle.vertices[1]);
+		Vector3 v2p = Subtract(p, triangle.vertices[2]);
+		Vector3 v0p = Subtract(p, triangle.vertices[0]);
+
+		Vector3 cross01 = Cross(v01, v1p);
+		Vector3 cross12 = Cross(v12, v2p);
+		Vector3 cross20 = Cross(v20, v0p);
+
+		if (Dot(cross01, plane.normal) >= 0.0f &&
+			Dot(cross12, plane.normal) >= 0.0f &&
+			Dot(cross20, plane.normal) >= 0.0f) {
+			return true;
+		}
+
+	}
+
+	return false;
+
+
+}
+
+bool IsCollision(const Triangle& triangle, const Segment& segment) {
+
+	Plane plane;
+	Vector3 v01 = Subtract(triangle.vertices[1], triangle.vertices[0]);
+	Vector3 v12 = Subtract(triangle.vertices[2], triangle.vertices[1]);
+	plane.normal = Normalize(Cross(v01, v12));
+	plane.distance = Dot(triangle.vertices[0], plane.normal);
+
+	float dot = Dot(segment.diff, plane.normal);
+	if (dot == 0.0f) {
+		return false;
+	}
+
+	float t = (plane.distance - Dot(segment.origin, plane.normal)) / dot;
+	if (0 <= t && t <= 1) {
+		
+		Vector3 p = Add(segment.origin, Multiply(t, segment.diff));
+		Vector3 v20 = Subtract(triangle.vertices[0], triangle.vertices[2]);
+		Vector3 v1p = Subtract(p, triangle.vertices[1]);
+		Vector3 v2p = Subtract(p, triangle.vertices[2]);
+		Vector3 v0p = Subtract(p, triangle.vertices[0]);
+
+		Vector3 cross01 = Cross(v01, v1p);
+		Vector3 cross12 = Cross(v12, v2p);
+		Vector3 cross20 = Cross(v20, v0p);
+
+		if (Dot(cross01, plane.normal) >= 0.0f &&
+			Dot(cross12, plane.normal) >= 0.0f &&
+			Dot(cross20, plane.normal) >= 0.0f) {
+			return true;
+		}
+
+	}
+
 	return false;
 
 }
