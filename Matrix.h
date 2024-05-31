@@ -88,6 +88,9 @@ void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const 
 //三角形の描画
 void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
+//AABBの描画
+void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+
 //球と球の衝突判定
 bool IsCollision(const Sphere& s1, const Sphere& s2);
 
@@ -111,3 +114,6 @@ bool IsCollision(const Triangle& triangle, const Ray& ray);
 
 //三角形と線分の衝突判定
 bool IsCollision(const Triangle& triangle, const Segment& segment);
+
+//AABB同士の衝突判定
+bool IsCollision(const AABB& aabb1, const AABB& aabb2);
