@@ -591,6 +591,45 @@ void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatri
 
 }
 
+void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
+
+	Vector3 draw[8];
+	draw[0] = { aabb.min.x, aabb.min.y, aabb.min.z };
+	draw[1] = { aabb.max.x, aabb.min.y, aabb.min.z };
+	draw[2] = { aabb.max.x, aabb.max.y, aabb.min.z };
+	draw[3] = { aabb.min.x, aabb.max.y, aabb.min.z };
+	draw[4] = { aabb.min.x, aabb.min.y, aabb.max.z };
+	draw[5] = { aabb.max.x, aabb.min.y, aabb.max.z };
+	draw[6] = { aabb.max.x, aabb.max.y, aabb.max.z };
+	draw[7] = { aabb.min.x, aabb.max.y, aabb.max.z };
+
+	for (int i = 0; i < 8; i++) {
+		draw[i] = Transform(Transform(draw[i], viewProjectionMatrix), viewportMatrix);
+	}
+
+	for (int i = 0; i < 4; i++) {
+
+		if (i == 3) {
+			Novice::DrawLine(static_cast<int>(draw[i].x), static_cast<int>(draw[i].y), static_cast<int>(draw[0].x), static_cast<int>(draw[0].y), color);
+		
+			Novice::DrawLine(static_cast<int>(draw[i + 4].x), static_cast<int>(draw[i + 4].y), static_cast<int>(draw[4].x), static_cast<int>(draw[4].y), color);
+
+			Novice::DrawLine(static_cast<int>(draw[i].x), static_cast<int>(draw[i].y), static_cast<int>(draw[i + 4].x), static_cast<int>(draw[i + 4].y), color);
+
+		}
+		else {
+			Novice::DrawLine(static_cast<int>(draw[i].x), static_cast<int>(draw[i].y), static_cast<int>(draw[i + 1].x), static_cast<int>(draw[i + 1].y), color);
+		
+			Novice::DrawLine(static_cast<int>(draw[i + 4].x), static_cast<int>(draw[i + 4].y), static_cast<int>(draw[i + 5].x), static_cast<int>(draw[i + 5].y), color);
+
+			Novice::DrawLine(static_cast<int>(draw[i].x), static_cast<int>(draw[i].y), static_cast<int>(draw[i + 4].x), static_cast<int>(draw[i + 4].y), color);
+
+		}
+
+	}
+
+}
+
 
 bool IsCollision(const Sphere& s1, const Sphere& s2) {
 
@@ -769,6 +808,18 @@ bool IsCollision(const Triangle& triangle, const Segment& segment) {
 
 	}
 
+	return false;
+
+}
+
+bool IsCollision(const AABB& aabb1, const AABB& aabb2) {
+
+	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) &&
+		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) &&
+		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)) {
+
+		return true;
+	}
 	return false;
 
 }
