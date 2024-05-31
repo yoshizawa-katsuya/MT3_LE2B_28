@@ -29,7 +29,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 ViewProjectionMatrix;
 	Matrix4x4 viewportMatrix;
 
+	Sphere sphere = { {0.0f, 0.0f, 1.0f}, 0.5f };
 
+	AABB aabb = {
+		.min{-0.5f, -0.5f, -0.5f},
+		.max{0.0f, 0.0f, 0.0f},
+	};
 	
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -53,8 +58,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
+		ImGui::DragFloat3("sphere.center", &sphere.center.x, 0.01f);
+		ImGui::DragFloat("sphere.radius", &sphere.radius, 0.01f);
+		ImGui::DragFloat3("aabb.min", &aabb.min.x, 0.01f);
+		ImGui::DragFloat3("aabb.max", &aabb.max.x, 0.01f);
 		ImGui::End();
 
+		aabb.min.x = (std::min)(aabb.min.x, aabb.max.x);
+		aabb.max.x = (std::max)(aabb.min.x, aabb.max.x);
+		aabb.min.y = (std::min)(aabb.min.y, aabb.max.y);
+		aabb.max.y = (std::max)(aabb.min.y, aabb.max.y);
+		aabb.min.z = (std::min)(aabb.min.z, aabb.max.z);
+		aabb.max.z = (std::max)(aabb.min.z, aabb.max.z);
 
 		///
 		/// ↑更新処理ここまで
@@ -65,6 +80,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
+
+		DrawSphere(sphere, ViewProjectionMatrix, viewportMatrix, WHITE);
+		if (IsCollision(aabb, sphere)) {
+			DrawAABB(aabb, ViewProjectionMatrix, viewportMatrix, RED);
+		}
+		else {
+			DrawAABB(aabb, ViewProjectionMatrix, viewportMatrix, WHITE);
+		}
 
 		///
 		/// ↑描画処理ここまで

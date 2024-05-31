@@ -1,5 +1,6 @@
 #include "Matrix.h"
 #include "Vector.h"
+#include <algorithm>
 
 Matrix3x3 MakeTranslateMatrix(Vector2 translate) {
 	Matrix3x3 matrix;
@@ -820,6 +821,22 @@ bool IsCollision(const AABB& aabb1, const AABB& aabb2) {
 
 		return true;
 	}
+	return false;
+
+}
+
+bool IsCollision(const AABB& aabb, const Sphere& sphere) {
+
+	Vector3 closestPoint{ std::clamp(sphere.center.x, aabb.min.x, aabb.max.x),
+						  std::clamp(sphere.center.y, aabb.min.y, aabb.max.y),
+						  std::clamp(sphere.center.z, aabb.min.z, aabb.max.z)};
+
+	float distance = Length(Subtract(sphere.center, closestPoint));
+
+	if (distance <= sphere.radius) {
+		return true;
+	}
+
 	return false;
 
 }
