@@ -840,3 +840,93 @@ bool IsCollision(const AABB& aabb, const Sphere& sphere) {
 	return false;
 
 }
+
+bool IsCollision(const AABB& aabb, const Line& line) {
+
+
+	float txMin = (aabb.min.x - line.origin.x) / line.diff.x;
+	float txMax = (aabb.max.x - line.origin.x) / line.diff.x;
+	float tyMin = (aabb.min.y - line.origin.y) / line.diff.y;
+	float tyMax = (aabb.max.y - line.origin.y) / line.diff.y;
+	float tzMin = (aabb.min.z - line.origin.z) / line.diff.z;
+	float tzMax = (aabb.max.z - line.origin.z) / line.diff.z;
+
+	float tNearX = (std::min)(txMin, txMax);
+	float tFarX = (std::max)(txMin, txMax);
+	float tNearY = (std::min)(tyMin, tyMax);
+	float tFarY = (std::max)(tyMin, tyMax);
+	float tNearZ = (std::min)(tzMin, tzMax);
+	float tFarZ = (std::max)(tzMin, tzMax);
+
+	float tmin = (std::max)((std::max)(tNearX, tNearY), tNearZ);
+	float tmax = (std::min)((std::min)(tFarX, tFarY), tFarZ);
+
+	if (tmin <= tmax) {
+		return true;
+	}
+
+	return false;
+
+
+}
+
+bool IsCollision(const AABB& aabb, const Ray& ray) {
+
+	float txMin = (aabb.min.x - ray.origin.x) / ray.diff.x;
+	float txMax = (aabb.max.x - ray.origin.x) / ray.diff.x;
+	float tyMin = (aabb.min.y - ray.origin.y) / ray.diff.y;
+	float tyMax = (aabb.max.y - ray.origin.y) / ray.diff.y;
+	float tzMin = (aabb.min.z - ray.origin.z) / ray.diff.z;
+	float tzMax = (aabb.max.z - ray.origin.z) / ray.diff.z;
+
+	float tNearX = (std::min)(txMin, txMax);
+	float tFarX = (std::max)(txMin, txMax);
+	float tNearY = (std::min)(tyMin, tyMax);
+	float tFarY = (std::max)(tyMin, tyMax);
+	float tNearZ = (std::min)(tzMin, tzMax);
+	float tFarZ = (std::max)(tzMin, tzMax);
+
+	float tmin = (std::max)((std::max)(tNearX, tNearY), tNearZ);
+	float tmax = (std::min)((std::min)(tFarX, tFarY), tFarZ);
+
+	if (tmin <= tmax) {
+		if (tmax >= 0.0f) {
+			return true;
+		}
+	}
+
+	return false;
+
+}
+
+bool IsCollision(const AABB& aabb, const Segment& segment) {
+
+	float txMin = (aabb.min.x - segment.origin.x) / segment.diff.x;
+	float txMax = (aabb.max.x - segment.origin.x) / segment.diff.x;
+	float tyMin = (aabb.min.y - segment.origin.y) / segment.diff.y;
+	float tyMax = (aabb.max.y - segment.origin.y) / segment.diff.y;
+	float tzMin = (aabb.min.z - segment.origin.z) / segment.diff.z;
+	float tzMax = (aabb.max.z - segment.origin.z) / segment.diff.z;
+
+	float tNearX = (std::min)(txMin, txMax);
+	float tFarX = (std::max)(txMin, txMax);
+	float tNearY = (std::min)(tyMin, tyMax);
+	float tFarY = (std::max)(tyMin, tyMax);
+	float tNearZ = (std::min)(tzMin, tzMax);
+	float tFarZ = (std::max)(tzMin, tzMax);
+
+	float tmin = (std::max)((std::max)(tNearX, tNearY), tNearZ);
+	float tmax = (std::min)((std::min)(tFarX, tFarY), tFarZ);
+
+	if (tmin <= tmax) {
+		if ((tmin >= 0.0f && tmin <= 1.0f) || (tmax >= 0.0f && tmax <= 1.0f)) {
+			return true;
+		}
+		else if (tmin < 0.0f && tmax > 1.0f) {
+			return true;
+		}
+	}
+
+	return false;
+
+}
