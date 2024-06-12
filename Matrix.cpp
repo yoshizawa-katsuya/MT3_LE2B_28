@@ -986,3 +986,63 @@ bool IsCollision(const OBB& obb, const Sphere& sphere) {
 	return IsCollision(aabbOBBLocal, sphereOBBLocal);
 
 }
+
+bool IsCollision(const OBB& obb, const Line& line) {
+
+	Matrix4x4 obbWorldMatrixInverse = Inverse(Matrix4x4{ { {obb.orientations[0].x,obb.orientations[0].y,obb.orientations[0].z, 0.0f},
+													   {obb.orientations[1].x,obb.orientations[1].y,obb.orientations[1].z, 0.0f},
+													   {obb.orientations[2].x,obb.orientations[2].y,obb.orientations[2].z, 0.0f},
+													   {obb.center.x,obb.center.y,obb.center.z, 1.0f}, } });
+
+	Vector3 localOrigin = Transform(line.origin, obbWorldMatrixInverse);
+	Vector3 localEnd = Transform(Add(line.origin, line.diff), obbWorldMatrixInverse);
+
+	AABB localAABB{ Multiply(-1.0f, obb.size), obb.size };
+
+	Line localLine;
+	localLine.origin = localOrigin;
+	localLine.diff = Subtract(localEnd, localOrigin);
+
+	return IsCollision(localAABB, localLine);
+
+}
+
+bool IsCollision(const OBB& obb, const Ray& ray) {
+
+	Matrix4x4 obbWorldMatrixInverse = Inverse(Matrix4x4{ { {obb.orientations[0].x,obb.orientations[0].y,obb.orientations[0].z, 0.0f},
+													   {obb.orientations[1].x,obb.orientations[1].y,obb.orientations[1].z, 0.0f},
+													   {obb.orientations[2].x,obb.orientations[2].y,obb.orientations[2].z, 0.0f},
+													   {obb.center.x,obb.center.y,obb.center.z, 1.0f}, } });
+
+	Vector3 localOrigin = Transform(ray.origin, obbWorldMatrixInverse);
+	Vector3 localEnd = Transform(Add(ray.origin, ray.diff), obbWorldMatrixInverse);
+
+	AABB localAABB{ Multiply(-1.0f, obb.size), obb.size };
+
+	Ray localRay;
+	localRay.origin = localOrigin;
+	localRay.diff = Subtract(localEnd, localOrigin);
+
+	return IsCollision(localAABB, localRay);
+
+}
+
+bool IsCollision(const OBB& obb, const Segment& segemnt) {
+
+	Matrix4x4 obbWorldMatrixInverse = Inverse(Matrix4x4{ { {obb.orientations[0].x,obb.orientations[0].y,obb.orientations[0].z, 0.0f},
+													   {obb.orientations[1].x,obb.orientations[1].y,obb.orientations[1].z, 0.0f},
+													   {obb.orientations[2].x,obb.orientations[2].y,obb.orientations[2].z, 0.0f},
+													   {obb.center.x,obb.center.y,obb.center.z, 1.0f}, } });
+
+	Vector3 localOrigin = Transform(segemnt.origin, obbWorldMatrixInverse);
+	Vector3 localEnd = Transform(Add(segemnt.origin, segemnt.diff), obbWorldMatrixInverse);
+
+	AABB localAABB{ Multiply(-1.0f, obb.size), obb.size };
+
+	Segment localSegment;
+	localSegment.origin = localOrigin;
+	localSegment.diff = Subtract(localEnd, localOrigin);
+
+	return IsCollision(localAABB, localSegment);
+
+}

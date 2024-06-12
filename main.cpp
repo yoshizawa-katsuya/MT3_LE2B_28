@@ -30,6 +30,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 viewportMatrix;
 
 
+	Vector3 rotate{ 0.0f, 0.0f, 0.0f };
+	OBB obb{
+		.center{-1.0f, 0.0f, 0.0f},
+		.orientations{{1.0f, 0.0f, 0.0f},
+					  {0.0f, 1.0f, 0.0f},
+					  {0.0f, 0.0f, 1.0f}},
+		.size{0.5f, 0.5f, 0.5f}
+	};
+	Segment segment{
+		.origin{-0.8f, -0.3f, 0.0f},
+		.diff{0.5f, 0.5f, 0.5f}
+	};
 	
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -50,9 +62,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ViewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 		viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
+		//回転行列を作成
+		Matrix4x4 rotateMatrix = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
+
+		//回転行列から軸を抽出
+		obb.orientations[0].x = rotateMatrix.m[0][0];
+		obb.orientations[0].y = rotateMatrix.m[0][1];
+		obb.orientations[0].z = rotateMatrix.m[0][2];
+
+		obb.orientations[1].x = rotateMatrix.m[1][0];
+		obb.orientations[1].y = rotateMatrix.m[1][1];
+		obb.orientations[1].z = rotateMatrix.m[1][2];
+
+		obb.orientations[2].x = rotateMatrix.m[2][0];
+		obb.orientations[2].y = rotateMatrix.m[2][1];
+		obb.orientations[2].z = rotateMatrix.m[2][2];
+
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
+		ImGui::DragFloat3("OBBcenter", &obb.center.x, 0.01f);
+		ImGui::DragFloat3("rotate", &rotate.x, 0.01f);
+		ImGui::DragFloat3("OBB.orientations[0]", &obb.orientations[0].x, 0.01f);
+		ImGui::DragFloat3("OBB.orientations[1]", &obb.orientations[1].x, 0.01f);
+		ImGui::DragFloat3("OBB.orientations[2]", &obb.orientations[2].x, 0.01f);
+		ImGui::DragFloat3("OBB.size", &obb.size.x, 0.01f);
+		ImGui::DragFloat3("Segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("Segment.diff", &segment.diff.x, 0.01f);
 		ImGui::End();
 
 
@@ -65,6 +101,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
+
+		if (IsCollision(obb, segment)){
+			DrawOBB(obb, ViewProjectionMatrix, viewportMatrix, RED);
+		}
+		else {
+			DrawOBB(obb, ViewProjectionMatrix, viewportMatrix, WHITE);
+		}
+
+		DrawSegment(segment, ViewProjectionMatrix, viewportMatrix, WHITE);
 
 		///
 		/// ↑描画処理ここまで
