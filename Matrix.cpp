@@ -631,6 +631,46 @@ void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Mat
 
 }
 
+void DrawOBB(const OBB& obb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color)
+{
+
+	Vector3 draw[8];
+	draw[0] = Add(Add(Add(obb.center, Multiply(-obb.size.x, obb.orientations[0])), Multiply(-obb.size.y, obb.orientations[1])), Multiply(-obb.size.z, obb.orientations[2]));
+	draw[1] = Add(Add(Add(obb.center, Multiply(obb.size.x, obb.orientations[0])), Multiply(-obb.size.y, obb.orientations[1])), Multiply(-obb.size.z, obb.orientations[2]));
+	draw[2] = Add(Add(Add(obb.center, Multiply(obb.size.x, obb.orientations[0])), Multiply(obb.size.y, obb.orientations[1])), Multiply(-obb.size.z, obb.orientations[2]));
+	draw[3] = Add(Add(Add(obb.center, Multiply(-obb.size.x, obb.orientations[0])), Multiply(obb.size.y, obb.orientations[1])), Multiply(-obb.size.z, obb.orientations[2]));
+	draw[4] = Add(Add(Add(obb.center, Multiply(-obb.size.x, obb.orientations[0])), Multiply(-obb.size.y, obb.orientations[1])), Multiply(obb.size.z, obb.orientations[2]));
+	draw[5] = Add(Add(Add(obb.center, Multiply(obb.size.x, obb.orientations[0])), Multiply(-obb.size.y, obb.orientations[1])), Multiply(obb.size.z, obb.orientations[2]));
+	draw[6] = Add(Add(Add(obb.center, Multiply(obb.size.x, obb.orientations[0])), Multiply(obb.size.y, obb.orientations[1])), Multiply(obb.size.z, obb.orientations[2]));
+	draw[7] = Add(Add(Add(obb.center, Multiply(-obb.size.x, obb.orientations[0])), Multiply(obb.size.y, obb.orientations[1])), Multiply(obb.size.z, obb.orientations[2]));
+
+	for (int i = 0; i < 8; i++) {
+		draw[i] = Transform(Transform(draw[i], viewProjectionMatrix), viewportMatrix);
+	}
+
+	for (int i = 0; i < 4; i++) {
+
+		if (i == 3) {
+			Novice::DrawLine(static_cast<int>(draw[i].x), static_cast<int>(draw[i].y), static_cast<int>(draw[0].x), static_cast<int>(draw[0].y), color);
+
+			Novice::DrawLine(static_cast<int>(draw[i + 4].x), static_cast<int>(draw[i + 4].y), static_cast<int>(draw[4].x), static_cast<int>(draw[4].y), color);
+
+			Novice::DrawLine(static_cast<int>(draw[i].x), static_cast<int>(draw[i].y), static_cast<int>(draw[i + 4].x), static_cast<int>(draw[i + 4].y), color);
+
+		}
+		else {
+			Novice::DrawLine(static_cast<int>(draw[i].x), static_cast<int>(draw[i].y), static_cast<int>(draw[i + 1].x), static_cast<int>(draw[i + 1].y), color);
+
+			Novice::DrawLine(static_cast<int>(draw[i + 4].x), static_cast<int>(draw[i + 4].y), static_cast<int>(draw[i + 5].x), static_cast<int>(draw[i + 5].y), color);
+
+			Novice::DrawLine(static_cast<int>(draw[i].x), static_cast<int>(draw[i].y), static_cast<int>(draw[i + 4].x), static_cast<int>(draw[i + 4].y), color);
+
+		}
+
+	}
+
+
+}
 
 bool IsCollision(const Sphere& s1, const Sphere& s2) {
 
@@ -928,5 +968,21 @@ bool IsCollision(const AABB& aabb, const Segment& segment) {
 	}
 
 	return false;
+
+}
+
+bool IsCollision(const OBB& obb, const Sphere& sphere) {
+
+	Matrix4x4 obbWorldMatrixInverse = Inverse(Matrix4x4{ { {obb.orientations[0].x,obb.orientations[0].y,obb.orientations[0].z, 0.0f},
+													   {obb.orientations[1].x,obb.orientations[1].y,obb.orientations[1].z, 0.0f},
+													   {obb.orientations[2].x,obb.orientations[2].y,obb.orientations[2].z, 0.0f},
+													   {obb.center.x,obb.center.y,obb.center.z, 1.0f}, } });
+
+	Vector3 centerInOBBLocalSpace = Transform(sphere.center, obbWorldMatrixInverse);
+
+	AABB aabbOBBLocal{ Multiply(-1.0f, obb.size), obb.size };
+	Sphere sphereOBBLocal{ centerInOBBLocalSpace, sphere.radius };
+	//ローカル空間で衝突判定
+	return IsCollision(aabbOBBLocal, sphereOBBLocal);
 
 }
