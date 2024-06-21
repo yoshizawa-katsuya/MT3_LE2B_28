@@ -1046,3 +1046,50 @@ bool IsCollision(const OBB& obb, const Segment& segemnt) {
 	return IsCollision(localAABB, localSegment);
 
 }
+
+bool IsCollision(const OBB& obb1, const OBB& obb2) {
+
+	Vector3 separationAxis;
+
+	for (int i = 0; i < 15; i++) {
+
+		if (i < 3) {
+			separationAxis = obb1.orientations[i];
+		}
+		else if (i < 6) {
+			separationAxis = obb2.orientations[i - 3];
+		}
+		else {
+			if (i < 9) {
+				separationAxis = Cross(obb1.orientations[0], obb2.orientations[i - 6]);
+			}
+			else if (i < 12) {
+				separationAxis = Cross(obb1.orientations[1], obb2.orientations[i - 9]);
+			}
+			else if (i < 15) {
+				separationAxis = Cross(obb1.orientations[2], obb2.orientations[i - 12]);
+			}
+		}
+
+		// 各OBBの投影範囲を計算
+		float projection1 =
+			obb1.size.x * std::abs(Dot(separationAxis, obb1.orientations[0])) +
+			obb1.size.y * std::abs(Dot(separationAxis, obb1.orientations[1])) +
+			obb1.size.z * std::abs(Dot(separationAxis, obb1.orientations[2]));
+
+		float projection2 =
+			obb2.size.x * std::abs(Dot(separationAxis, obb2.orientations[0])) +
+			obb2.size.y * std::abs(Dot(separationAxis, obb2.orientations[1])) +
+			obb2.size.z * std::abs(Dot(separationAxis, obb2.orientations[2]));
+
+		float distance = std::abs(Dot(Subtract(obb2.center, obb1.center), separationAxis));
+
+		if (!(distance <= (projection1 + projection2))) {
+			return false;
+		}
+
+	}
+
+	return true;
+
+}

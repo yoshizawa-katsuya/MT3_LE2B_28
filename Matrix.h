@@ -144,3 +144,6 @@ bool IsCollision(const OBB& obb, const Ray& ray);
 
 //OBBと線分の衝突判定
 bool IsCollision(const OBB& obb, const Segment& segemnt);
+
+//OBB同士の衝突判定
+bool IsCollision(const OBB& obb1, const OBB& obb2);
