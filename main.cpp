@@ -30,10 +30,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 ViewProjectionMatrix;
 	Matrix4x4 viewportMatrix;
 
-	Vector3 controlPoints[3] = {
+	Vector3 controlPoints[4] = {
 		{-0.8f, 0.58f, 1.0f},
 		{1.76f, 1.0f, -0.3f},
 		{0.94f, -0.7f, 2.3f},
+		{-0.53f, -0.26f-0.15f},
 	};
 	
 	// ウィンドウの×ボタンが押されるまでループ
@@ -63,6 +64,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("controlPoints[0]", &controlPoints[0].x, 0.01f);
 		ImGui::DragFloat3("controlPoints[1]", &controlPoints[1].x, 0.01f);
 		ImGui::DragFloat3("controlPoints[2]", &controlPoints[2].x, 0.01f);
+		ImGui::DragFloat3("controlPoints[3]", &controlPoints[3].x, 0.01f);
 
 		ImGui::End();
 
@@ -77,11 +79,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
 
-		DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], ViewProjectionMatrix, viewportMatrix, BLUE);
-		
+		DrawCatmullRom(controlPoints[0], controlPoints[0], controlPoints[1], controlPoints[2], ViewProjectionMatrix, viewportMatrix, BLUE);
+		DrawCatmullRom(controlPoints[0], controlPoints[1], controlPoints[2], controlPoints[3], ViewProjectionMatrix, viewportMatrix, BLUE);
+		DrawCatmullRom(controlPoints[1], controlPoints[2], controlPoints[3], controlPoints[3], ViewProjectionMatrix, viewportMatrix, BLUE);
+
+
 		DrawSphere({ controlPoints[0], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
 		DrawSphere({ controlPoints[1], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
 		DrawSphere({ controlPoints[2], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
+		DrawSphere({ controlPoints[3], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
 
 		
 		///
