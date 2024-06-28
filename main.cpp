@@ -1,6 +1,7 @@
 #include <Novice.h>
 #include "Matrix.h"
 #include "Vector.h"
+#include "Curve.h"
 #include <ImGuiManager.h>
 #include <imgui.h>
 
@@ -29,24 +30,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 ViewProjectionMatrix;
 	Matrix4x4 viewportMatrix;
 
-
-	Vector3 rotate1{ 0.0f, 0.0f, 0.0f };
-	Vector3 rotate2{ -0.05f, -2.49f, 0.15f };
-	OBB obb1{
-		.center{0.0f, 0.0f, 0.0f},
-		.orientations{{1.0f, 0.0f, 0.0f},
-					  {0.0f, 1.0f, 0.0f},
-					  {0.0f, 0.0f, 1.0f}},
-		.size{0.83f, 0.26f, 0.24f}
+	Vector3 controlPoints[3] = {
+		{-0.8f, 0.58f, 1.0f},
+		{1.76f, 1.0f, -0.3f},
+		{0.94f, -0.7f, 2.3f},
 	};
-	OBB obb2{
-		.center{0.9f, 0.66f, 0.78f},
-		.orientations{{1.0f, 0.0f, 0.0f},
-					  {0.0f, 1.0f, 0.0f},
-					  {0.0f, 0.0f, 1.0f}},
-		.size{0.5f, 0.37f, 0.5f}
-	};
-	
 	
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -67,53 +55,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ViewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 		viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
-		//回転行列を作成
-		Matrix4x4 rotateMatrix1 = Multiply(MakeRotateXMatrix(rotate1.x), Multiply(MakeRotateYMatrix(rotate1.y), MakeRotateZMatrix(rotate1.z)));
-
-		//回転行列から軸を抽出
-		obb1.orientations[0].x = rotateMatrix1.m[0][0];
-		obb1.orientations[0].y = rotateMatrix1.m[0][1];
-		obb1.orientations[0].z = rotateMatrix1.m[0][2];
-
-		obb1.orientations[1].x = rotateMatrix1.m[1][0];
-		obb1.orientations[1].y = rotateMatrix1.m[1][1];
-		obb1.orientations[1].z = rotateMatrix1.m[1][2];
-
-		obb1.orientations[2].x = rotateMatrix1.m[2][0];
-		obb1.orientations[2].y = rotateMatrix1.m[2][1];
-		obb1.orientations[2].z = rotateMatrix1.m[2][2];
-
-		//回転行列を作成
-		Matrix4x4 rotateMatrix2 = Multiply(MakeRotateXMatrix(rotate2.x), Multiply(MakeRotateYMatrix(rotate2.y), MakeRotateZMatrix(rotate2.z)));
-
-		//回転行列から軸を抽出
-		obb2.orientations[0].x = rotateMatrix2.m[0][0];
-		obb2.orientations[0].y = rotateMatrix2.m[0][1];
-		obb2.orientations[0].z = rotateMatrix2.m[0][2];
-
-		obb2.orientations[1].x = rotateMatrix2.m[1][0];
-		obb2.orientations[1].y = rotateMatrix2.m[1][1];
-		obb2.orientations[1].z = rotateMatrix2.m[1][2];
-
-		obb2.orientations[2].x = rotateMatrix2.m[2][0];
-		obb2.orientations[2].y = rotateMatrix2.m[2][1];
-		obb2.orientations[2].z = rotateMatrix2.m[2][2];
+		
 
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
-		ImGui::DragFloat3("OBBcenter1", &obb1.center.x, 0.01f);
-		ImGui::DragFloat3("rotate1", &rotate1.x, 0.01f);
-		ImGui::DragFloat3("OBB1.orientations[0]", &obb1.orientations[0].x, 0.01f);
-		ImGui::DragFloat3("OBB1.orientations[1]", &obb1.orientations[1].x, 0.01f);
-		ImGui::DragFloat3("OBB1.orientations[2]", &obb1.orientations[2].x, 0.01f);
-		ImGui::DragFloat3("OBB1.size", &obb1.size.x, 0.01f);
-		ImGui::DragFloat3("OBB2center", &obb2.center.x, 0.01f);
-		ImGui::DragFloat3("rotate2", &rotate2.x, 0.01f);
-		ImGui::DragFloat3("OBB2.orientations[0]", &obb2.orientations[0].x, 0.01f);
-		ImGui::DragFloat3("OBB2.orientations[1]", &obb2.orientations[1].x, 0.01f);
-		ImGui::DragFloat3("OBB2.orientations[2]", &obb2.orientations[2].x, 0.01f);
-		ImGui::DragFloat3("OBB2.size", &obb2.size.x, 0.01f);
+		ImGui::DragFloat3("controlPoints[0]", &controlPoints[0].x, 0.01f);
+		ImGui::DragFloat3("controlPoints[1]", &controlPoints[1].x, 0.01f);
+		ImGui::DragFloat3("controlPoints[2]", &controlPoints[2].x, 0.01f);
 
 		ImGui::End();
 
@@ -128,16 +77,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
 
+		DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], ViewProjectionMatrix, viewportMatrix, BLUE);
 		
-		DrawOBB(obb1, ViewProjectionMatrix, viewportMatrix, WHITE);
-		
-		if (IsCollision(obb1, obb2)) {
-			DrawOBB(obb2, ViewProjectionMatrix, viewportMatrix, RED);
+		DrawSphere({ controlPoints[0], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
+		DrawSphere({ controlPoints[1], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
+		DrawSphere({ controlPoints[2], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
 
-		}
-		else {
-			DrawOBB(obb2, ViewProjectionMatrix, viewportMatrix, WHITE);
-		}
 		
 		///
 		/// ↑描画処理ここまで

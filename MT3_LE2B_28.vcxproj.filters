@@ -41,6 +41,15 @@
     <ClCompile Include="Matrix.cpp">
       <Filter>KamataEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Vector.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Curve.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Lerp.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\KamataEngine\DirectXGame\audio\Audio.h">
@@ -116,5 +125,8 @@
     </ClInclude>
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Struct.h" />
+    <ClInclude Include="Vector.h" />
+    <ClInclude Include="Curve.h" />
+    <ClInclude Include="Lerp.h" />
   </ItemGroup>
 </Project>
