@@ -30,27 +30,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 ViewProjectionMatrix;
 	Matrix4x4 viewportMatrix;
 
-	Vector3 translates[3] = {
-		{0.2f, 1.0f, 0.0f},
-		{0.4f, 0.0f, 0.0f},
-		{0.3f, 0.0f, 0.0f},
-	};
-
-	Vector3 rotates[3] = {
-		{0.0f, 0.0f, -6.8f},
-		{0.0f, 0.0f, -1.4f},
-		{0.0f, 0.0f, 0.0f},
-	};
-
-	Vector3 scales[3] = {
-		{1.0f, 1.0f, 1.0f},
-		{1.0f, 1.0f, 1.0f},
-		{1.0f, 1.0f, 1.0f},
-	};
-	
-	Matrix4x4 worldMatrixS;
-	Matrix4x4 worldMatrixE;
-	Matrix4x4 worldMatrixH;
+	Vector3 a{ 0.2f, 1.0f, 0.0f };
+	Vector3 b{ 2.4f, 3.1f, 1.2f };
+	Vector3 c = a + b;
+	Vector3 d = a - b;
+	Vector3 e = a * 2.4f;
+	Vector3 rotate{ 0.4f, 1.43f, -0.8f };
+	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
+	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
+	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
+	Matrix4x4 rotateMatrix = rotateXMatrix * rotateYMatrix * rotateZMatrix;
 
 
 	// ウィンドウの×ボタンが押されるまでループ
@@ -72,22 +61,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ViewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 		viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
-		worldMatrixS = MakeAffineMatrix(scales[0], rotates[0], translates[0]);
-		worldMatrixE = Multiply(MakeAffineMatrix(scales[1], rotates[1], translates[1]), worldMatrixS);
-		worldMatrixH = Multiply(MakeAffineMatrix(scales[2], rotates[2], translates[2]), worldMatrixE);
-
+		
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
-		ImGui::DragFloat3("translate[0]", &translates[0].x, 0.01f);
-		ImGui::DragFloat3("rotates[0]", &rotates[0].x, 0.01f);
-		ImGui::DragFloat3("scales[0]", &scales[0].x, 0.01f);
-		ImGui::DragFloat3("translate[1]", &translates[1].x, 0.01f);
-		ImGui::DragFloat3("rotates[1]", &rotates[1].x, 0.01f);
-		ImGui::DragFloat3("scales[1]", &scales[1].x, 0.01f);
-		ImGui::DragFloat3("translate[2]", &translates[2].x, 0.01f);
-		ImGui::DragFloat3("rotates[2]", &rotates[2].x, 0.01f);
-		ImGui::DragFloat3("scales[2]", &scales[2].x, 0.01f);
+		ImGui::Text("c:%f, %f, %f", c.x, c.y, c.z);
+		ImGui::Text("d:%f, %f, %f", d.x, d.y, d.z);
+		ImGui::Text("e:%f, %f, %f", e.x, e.y, e.z);
+		ImGui::Text(
+			"matrix:\n%f, %f, %f, %f\n%f, %f, %f, %f\n%f, %f, %f, %f\n%f, %f, %f, %f\n",
+			rotateMatrix.m[0][0], rotateMatrix.m[0][1], rotateMatrix.m[0][2], rotateMatrix.m[0][3],
+			rotateMatrix.m[1][0], rotateMatrix.m[1][1], rotateMatrix.m[1][2], rotateMatrix.m[1][3],
+			rotateMatrix.m[2][0], rotateMatrix.m[2][1], rotateMatrix.m[2][2], rotateMatrix.m[2][3],
+			rotateMatrix.m[3][0], rotateMatrix.m[3][1], rotateMatrix.m[3][2], rotateMatrix.m[3][3]
+			);
 
 		ImGui::End();
 
@@ -102,23 +89,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
 
-		Vector3 line[3];
-		line[0] = { worldMatrixS.m[3][0], worldMatrixS.m[3][1], worldMatrixS.m[3][2] };
-		line[1] = { worldMatrixE.m[3][0], worldMatrixE.m[3][1], worldMatrixE.m[3][2] };
-		line[2] = { worldMatrixH.m[3][0], worldMatrixH.m[3][1], worldMatrixH.m[3][2] };
-
-		line[0] = Transform(Transform(line[0], ViewProjectionMatrix), viewportMatrix);
-		line[1] = Transform(Transform(line[1], ViewProjectionMatrix), viewportMatrix);
-		line[2] = Transform(Transform(line[2], ViewProjectionMatrix), viewportMatrix);
-
-		Novice::DrawLine(static_cast<int>(line[0].x), static_cast<int>(line[0].y), static_cast<int>(line[1].x), static_cast<int>(line[1].y), WHITE);
-		Novice::DrawLine(static_cast<int>(line[1].x), static_cast<int>(line[1].y), static_cast<int>(line[2].x), static_cast<int>(line[2].y), WHITE);
-
 		
-		DrawSphere({ {worldMatrixS.m[3][0], worldMatrixS.m[3][1], worldMatrixS.m[3][2]}, 0.1f }, ViewProjectionMatrix, viewportMatrix, RED);
-		DrawSphere({ {worldMatrixE.m[3][0], worldMatrixE.m[3][1], worldMatrixE.m[3][2]}, 0.1f }, ViewProjectionMatrix, viewportMatrix, GREEN);
-		DrawSphere({ {worldMatrixH.m[3][0], worldMatrixH.m[3][1], worldMatrixH.m[3][2]}, 0.1f }, ViewProjectionMatrix, viewportMatrix, BLUE);
-
 		
 		///
 		/// ↑描画処理ここまで
