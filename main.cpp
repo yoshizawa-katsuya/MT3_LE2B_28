@@ -30,13 +30,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 ViewProjectionMatrix;
 	Matrix4x4 viewportMatrix;
 
-	Vector3 controlPoints[4] = {
-		{-0.8f, 0.58f, 1.0f},
-		{1.76f, 1.0f, -0.3f},
-		{0.94f, -0.7f, 2.3f},
-		{-0.53f, -0.26f-0.15f},
+	Vector3 translates[3] = {
+		{0.2f, 1.0f, 0.0f},
+		{0.4f, 0.0f, 0.0f},
+		{0.3f, 0.0f, 0.0f},
+	};
+
+	Vector3 rotates[3] = {
+		{0.0f, 0.0f, -6.8f},
+		{0.0f, 0.0f, -1.4f},
+		{0.0f, 0.0f, 0.0f},
+	};
+
+	Vector3 scales[3] = {
+		{1.0f, 1.0f, 1.0f},
+		{1.0f, 1.0f, 1.0f},
+		{1.0f, 1.0f, 1.0f},
 	};
 	
+	Matrix4x4 worldMatrixS;
+	Matrix4x4 worldMatrixE;
+	Matrix4x4 worldMatrixH;
+
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -56,15 +72,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ViewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 		viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
-		
+		worldMatrixS = MakeAffineMatrix(scales[0], rotates[0], translates[0]);
+		worldMatrixE = Multiply(MakeAffineMatrix(scales[1], rotates[1], translates[1]), worldMatrixS);
+		worldMatrixH = Multiply(MakeAffineMatrix(scales[2], rotates[2], translates[2]), worldMatrixE);
 
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
-		ImGui::DragFloat3("controlPoints[0]", &controlPoints[0].x, 0.01f);
-		ImGui::DragFloat3("controlPoints[1]", &controlPoints[1].x, 0.01f);
-		ImGui::DragFloat3("controlPoints[2]", &controlPoints[2].x, 0.01f);
-		ImGui::DragFloat3("controlPoints[3]", &controlPoints[3].x, 0.01f);
+		ImGui::DragFloat3("translate[0]", &translates[0].x, 0.01f);
+		ImGui::DragFloat3("rotates[0]", &rotates[0].x, 0.01f);
+		ImGui::DragFloat3("scales[0]", &scales[0].x, 0.01f);
+		ImGui::DragFloat3("translate[1]", &translates[1].x, 0.01f);
+		ImGui::DragFloat3("rotates[1]", &rotates[1].x, 0.01f);
+		ImGui::DragFloat3("scales[1]", &scales[1].x, 0.01f);
+		ImGui::DragFloat3("translate[2]", &translates[2].x, 0.01f);
+		ImGui::DragFloat3("rotates[2]", &rotates[2].x, 0.01f);
+		ImGui::DragFloat3("scales[2]", &scales[2].x, 0.01f);
 
 		ImGui::End();
 
@@ -79,15 +102,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(ViewProjectionMatrix, viewportMatrix);
 
-		DrawCatmullRom(controlPoints[0], controlPoints[0], controlPoints[1], controlPoints[2], ViewProjectionMatrix, viewportMatrix, BLUE);
-		DrawCatmullRom(controlPoints[0], controlPoints[1], controlPoints[2], controlPoints[3], ViewProjectionMatrix, viewportMatrix, BLUE);
-		DrawCatmullRom(controlPoints[1], controlPoints[2], controlPoints[3], controlPoints[3], ViewProjectionMatrix, viewportMatrix, BLUE);
+		Vector3 line[3];
+		line[0] = { worldMatrixS.m[3][0], worldMatrixS.m[3][1], worldMatrixS.m[3][2] };
+		line[1] = { worldMatrixE.m[3][0], worldMatrixE.m[3][1], worldMatrixE.m[3][2] };
+		line[2] = { worldMatrixH.m[3][0], worldMatrixH.m[3][1], worldMatrixH.m[3][2] };
 
+		line[0] = Transform(Transform(line[0], ViewProjectionMatrix), viewportMatrix);
+		line[1] = Transform(Transform(line[1], ViewProjectionMatrix), viewportMatrix);
+		line[2] = Transform(Transform(line[2], ViewProjectionMatrix), viewportMatrix);
 
-		DrawSphere({ controlPoints[0], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
-		DrawSphere({ controlPoints[1], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
-		DrawSphere({ controlPoints[2], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
-		DrawSphere({ controlPoints[3], 0.01f }, ViewProjectionMatrix, viewportMatrix, BLACK);
+		Novice::DrawLine(static_cast<int>(line[0].x), static_cast<int>(line[0].y), static_cast<int>(line[1].x), static_cast<int>(line[1].y), WHITE);
+		Novice::DrawLine(static_cast<int>(line[1].x), static_cast<int>(line[1].y), static_cast<int>(line[2].x), static_cast<int>(line[2].y), WHITE);
+
+		
+		DrawSphere({ {worldMatrixS.m[3][0], worldMatrixS.m[3][1], worldMatrixS.m[3][2]}, 0.1f }, ViewProjectionMatrix, viewportMatrix, RED);
+		DrawSphere({ {worldMatrixE.m[3][0], worldMatrixE.m[3][1], worldMatrixE.m[3][2]}, 0.1f }, ViewProjectionMatrix, viewportMatrix, GREEN);
+		DrawSphere({ {worldMatrixH.m[3][0], worldMatrixH.m[3][1], worldMatrixH.m[3][2]}, 0.1f }, ViewProjectionMatrix, viewportMatrix, BLUE);
 
 		
 		///
